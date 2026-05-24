@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>90 Day Run Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --surface3: #222222;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --muted: #888880;
+    --accent: #e8c547;
+    --accent2: #c4a832;
+    --accent-dim: rgba(232,197,71,0.12);
+    --accent-dim2: rgba(232,197,71,0.22);
+    --green: #4caf7d;
+    --green-dim: rgba(76,175,125,0.15);
+    --red: #e05252;
+    --red-dim: rgba(224,82,82,0.15);
+    --blue: #5b9cf6;
+    --blue-dim: rgba(91,156,246,0.15);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 2px;
+    color: var(--accent);
+  }
+  .nav-tabs {
+    display: flex; gap: 4px;
+  }
+  .nav-tab {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nav-tab:hover { color: var(--text); background: var(--surface2); }
+  .nav-tab.active { color: var(--accent); background: var(--accent-dim); }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* SETUP */
+  .setup-wrap {
+    min-height: calc(100vh - 60px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 20px;
+  }
+  .setup-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 48px 56px;
+    width: 100%; max-width: 540px;
+  }
+  .setup-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 3px;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .setup-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px; letter-spacing: 2px;
+    line-height: 1.1; margin-bottom: 8px;
+  }
+  .setup-sub { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
+  .form-group { margin-bottom: 20px; }
+  label {
+    display: block;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.5px;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 8px;
+  }
+  input[type="text"], input[type="number"], input[type="date"], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    transition: border 0.15s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  select option { background: var(--surface2); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 28px;
+    border-radius: var(--radius);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent); color: #0a0a0a;
+    width: 100%;
+  }
+  .btn-primary:hover { background: #f0d060; transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    font-size: 13px; padding: 8px 16px;
+  }
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+  .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,82,82,0.3); font-size: 13px; padding: 8px 16px; }
+  .btn-danger:hover { background: rgba(224,82,82,0.25); }
+  .row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .task-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .task-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 14px;
+  }
+  .task-item .task-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--accent);
+    min-width: 48px;
+  }
+  .task-remove { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; }
+  .task-remove:hover { color: var(--red); }
+  .add-task-row { display: grid; grid-template-columns: 80px 1fr 40px; gap: 8px; align-items: end; margin-top: 8px; }
+  .add-task-row input { margin: 0; }
+  .btn-add-task {
+    background: var(--surface3); border: 1px solid var(--border2);
+    color: var(--accent); border-radius: var(--radius);
+    height: 46px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;
+  }
+  .btn-add-task:hover { background: var(--accent-dim); }
+
+  /* DASHBOARD */
+  .dash-wrap { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  .dash-header { margin-bottom: 32px; }
+  .dash-run-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; letter-spacing: 2px; color: var(--accent);
+  }
+  .dash-meta { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .stat-label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; line-height: 1; }
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.green { color: var(--green); }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* PROGRESS BAR */
+  .progress-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+  .progress-label-row {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+  }
+  .progress-title { font-size: 14px; font-weight: 600; }
+  .progress-pct { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--accent); }
+  .progress-track {
+    height: 12px; background: var(--surface3);
+    border-radius: 6px; overflow: hidden; position: relative;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 6px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-milestones {
+    display: flex; justify-content: space-between; margin-top: 10px;
+  }
+  .milestone-tick { font-size: 11px; color: var(--muted); text-align: center; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+  .panel-title {
+    font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+    margin-bottom: 18px; font-weight: 600;
+  }
+
+  /* GOAL TRACKER */
+  .goal-amount-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+  .goal-amount {
+    font-family: 'Bebas Neue', sans-serif; font-size: 48px;
+    color: var(--accent); letter-spacing: 1px;
+  }
+  .goal-total { font-size: 20px; color: var(--muted); }
+  .goal-progress-fill {
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, var(--green), #7be0a8);
+    transition: width 0.5s;
+  }
+  .goal-track { height: 8px; background: var(--surface3); border-radius: 4px; margin-bottom: 12px; overflow: hidden; }
+  .log-entry-row { display: grid; grid-template-columns: 1fr 100px; gap: 8px; }
+  .log-entry-row input { font-size: 14px; padding: 10px 14px; }
+  .btn-log { background: var(--green-dim); border: 1px solid rgba(76,175,125,0.3); color: var(--green); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; padding: 0 18px; }
+  .btn-log:hover { background: rgba(76,175,125,0.25); }
+  .log-history { margin-top: 16px; max-height: 180px; overflow-y: auto; }
+  .log-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-row-date { color: var(--muted); }
+  .log-row-amt { font-family: 'DM Mono', monospace; color: var(--green); font-weight: 500; }
+
+  /* SCHEDULE */
+  .schedule-day {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .schedule-day-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface2);
+    cursor: pointer;
+  }
+  .schedule-day-title { font-size: 14px; font-weight: 600; }
+  .schedule-day-date { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+  .schedule-day-badge {
+    font-size: 11px; padding: 3px 8px;
+    border-radius: 4px; font-weight: 500;
+  }
+  .badge-today { background: var(--accent-dim2); color: var(--accent); }
+  .badge-done { background: var(--green-dim); color: var(--green); }
+  .badge-past { background: var(--surface3); color: var(--muted); }
+  .badge-future { background: var(--surface3); color: var(--muted); }
+  .schedule-day-tasks {
+    padding: 0 16px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+    display: none;
+  }
+  .schedule-day.expanded .schedule-day-tasks { display: flex; }
+  .sched-task {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer; transition: all 0.12s;
+  }
+  .sched-task:hover { border-color: var(--border2); background: var(--surface2); }
+  .sched-task.done { opacity: 0.5; }
+  .sched-task.done .sched-task-name { text-decoration: line-through; color: var(--muted); }
+  .sched-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.12s;
+    font-size: 11px;
+  }
+  .sched-task.done .sched-check { background: var(--green); border-color: var(--green); color: #fff; }
+  .sched-task-name { font-size: 14px; font-weight: 500; }
+  .sched-task-time { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); margin-left: auto; }
+  .sched-empty { font-size: 13px; color: var(--muted); padding: 10px 0; text-align: center; }
+
+  /* GROWTH CHART */
+  .chart-wrap { margin-bottom: 28px; }
+  #growthChart { width: 100%; height: 220px; }
+
+  /* MOTIVATION BANNER */
+  .motivation-banner {
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,197,71,0.2);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .motivation-icon { font-size: 24px; }
+  .motivation-text { font-size: 15px; font-weight: 500; color: var(--accent); }
+  .motivation-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* SCHEDULE PAGE */
+  .sched-wrap { max-width: 700px; margin: 0 auto; padding: 32px 24px; }
+  .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+  .week-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .week-label { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--accent); }
+  .btn-week { background: var(--surface); border: 1px solid var(--border2); color: var(--muted); border-radius: 6px; padding: 6px 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-week:hover { color: var(--text); }
+
+  /* GROWTH PAGE */
+  .growth-wrap { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  .growth-chart-full { height: 300px; margin-bottom: 32px; }
+  .growth-chart-full canvas { height: 100% !important; }
+  .goal-type-label { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+
+  /* SETTINGS */
+  .settings-wrap { max-width: 600px; margin: 0 auto; padding: 32px 24px; }
+  .settings-section { margin-bottom: 36px; }
+  .settings-section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 16px; }
+  .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .settings-row-label { font-size: 14px; }
+  .settings-row-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .danger-zone { border: 1px solid rgba(224,82,82,0.2); border-radius: var(--radius); padding: 20px; background: var(--red-dim); }
+  .danger-title { font-size: 14px; font-weight: 600; color: var(--red); margin-bottom: 8px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  @media (max-width: 700px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .setup-card { padding: 32px 24px; }
+    .row-split { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">90 DAY RUN</div>
+  <div class="nav-tabs" id="navTabs" style="display:none;">
+    <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('schedule')">Schedule</button>
+    <button class="nav-tab" onclick="showPage('growth')">Growth</button>
+    <button class="nav-tab" onclick="showPage('settings')">Settings</button>
+  </div>
+</nav>
+
+<!-- SETUP PAGE -->
+<div class="page active" id="page-setup">
+  <div class="setup-wrap">
+    <div class="setup-card">
+      <div class="setup-eyebrow">Start Your Run</div>
+      <div class="setup-title">90 DAY RUN</div>
+      <div class="setup-sub">Set your goal, build your schedule, and track every step.</div>
+
+      <div class="form-group">
+        <label>Run Name</label>
+        <input type="text" id="s-name" placeholder="e.g. Financial Freedom Run" />
+      </div>
+
+      <div class="form-group">
+        <label>Goal Type</label>
+        <select id="s-goalType" onchange="toggleGoalType()">
+          <option value="money">💰 Money Target</option>
+          <option value="achievement">🏆 Achievement / Milestone</option>
+          <option value="habit">🔥 Habit Building</option>
+        </select>
+      </div>
+
+      <div id="moneyGoalFields">
+        <div class="row-split">
+          <div class="form-group">
+            <label>Target Amount ($)</label>
+            <input type="number" id="s-target" placeholder="10000" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Starting Amount ($)</label>
+            <input type="number" id="s-starting" placeholder="0" min="0" />
+          </div>
+        </div>
+      </div>
+
+      <div id="achievementGoalFields" style="display:none;">
+        <div class="form-group">
+          <label>Describe Your Goal</label>
+          <textarea id="s-achievGoal" placeholder="e.g. Launch my first product and get 100 paying customers"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" id="s-startDate" />
+      </div>
+
+      <div class="form-group">
+        <label>Daily Schedule Tasks</label>
+        <div class="task-list" id="taskList"></div>
+        <div class="add-task-row" style="margin-top:10px;">
+          <input type="text" id="taskTime" placeholder="6:00am" />
+          <input type="text" id="taskName" placeholder="Task name (e.g. Cold calls, Workout)" onkeydown="if(event.key==='Enter')addTask()" />
+          <button class="btn-add-task" onclick="addTask()">+</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="startRun()">🚀 Start My 90 Day Run</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div class="page" id="page-dashboard">
+  <div class="dash-wrap">
+    <div class="motivation-banner" id="motivationBanner">
+      <div class="motivation-icon">🔥</div>
+      <div>
+        <div class="motivation-text" id="motivationText">You're just getting started. Let's go!</div>
+        <div class="motivation-sub" id="motivationSub">Stay consistent. Every day counts.</div>
+      </div>
+    </div>
+
+    <div class="dash-header">
+      <div class="dash-run-title" id="dashTitle">YOUR 90 DAY RUN</div>
+      <div class="dash-meta" id="dashMeta">—</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Day</div>
+        <div class="stat-value accent" id="statDay">—</div>
+        <div class="stat-sub">of 90</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Days Left</div>
+        <div class="stat-value" id="statLeft">—</div>
+        <div class="stat-sub">remaining</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">On Track</div>
+        <div class="stat-value green" id="statStreak">—</div>
+        <div class="stat-sub" id="statStreakSub">day streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" id="stat4label">Progress</div>
+        <div class="stat-value accent" id="stat4val">—</div>
+        <div class="stat-sub" id="stat4sub">—</div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-label-row">
+        <div class="progress-title">Run Progress</div>
+        <div class="progress-pct" id="progressPct">0%</div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-milestones">
+        <div class="milestone-tick">Day 1</div>
+        <div class="milestone-tick">Day 30</div>
+        <div class="milestone-tick">Day 60</div>
+        <div class="milestone-tick">Day 90</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title" id="goalPanelTitle">Goal Progress</div>
+        <div id="moneyPanel">
+          <div class="goal-type-label">Amount raised</div>
+          <div class="goal-amount-row">
+            <div class="goal-amount" id="goalCurrent">$0</div>
+            <div class="goal-total" id="goalTotal">/ $0</div>
+          </div>
+          <div class="goal-track"><div class="goal-progress-fill" id="goalFill" style="width:0%"></div></div>
+          <div style="margin-top:12px;">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Log Progress</div>
+            <div class="log-entry-row">
+              <input type="number" id="logAmt" placeholder="Amount earned today..." />
+              <button class="btn-log" onclick="logAmount()">+ Log</button>
+            </div>
+          </div>
+          <div class="log-history" id="logHistory"></div>
+        </div>
+        <div id="achievPanel" style="display:none;">
+          <div style="font-size:14px;margin-bottom:14px;" id="achievGoalDisplay">—</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Log Update</div>
+          <textarea id="achievNote" placeholder="What did you accomplish today?" style="font-size:14px;padding:10px 14px;min-height:60px;"></textarea>
+          <button class="btn-log" style="margin-top:8px;padding:10px 18px;" onclick="logNote()">+ Log Note</button>
+          <div class="log-history" id="noteHistory"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Today's Schedule</div>
+        <div id="todaySchedule"></div>
+      </div>
+    </div>
+
+    <div class="chart-wrap panel">
+      <div class="panel-title">Progress Over Time</div>
+      <div style="position:relative;height:220px;">
+        <canvas id="dashChart" role="img" aria-label="Progress over 90 days">Progress chart</canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDULE PAGE -->
+<div class="page" id="page-schedule">
+  <div class="sched-wrap">
+    <div class="page-title">DAILY SCHEDULE</div>
+    <div class="page-sub">Your strict daily routine — check off tasks as you complete them.</div>
+
+    <div class="week-nav">
+      <button class="btn-week" onclick="changeWeek(-1)">← Prev</button>
+      <div class="week-label" id="weekLabel">Week 1</div>
+      <button class="btn-week" onclick="changeWeek(1)">Next →</button>
+    </div>
+
+    <div id="scheduleContainer"></div>
+  </div>
+</div>
+
+<!-- GROWTH PAGE -->
+<div class="page" id="page-growth">
+  <div class="growth-wrap">
+    <div class="page-title">GROWTH TRACKER</div>
+    <div class="page-sub">Track your financial and personal growth across the 90 days.</div>
+
+    <div class="panel" style="margin-bottom:24px;">
+      <div class="panel-title">Progress Chart</div>
+      <div class="growth-chart-full">
+        <canvas id="growthChart" role="img" aria-label="Full progress over 90 days">Full growth chart</canvas>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">Goal Breakdown</div>
+        <div id="growthGoalBreakdown"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Log History</div>
+        <div class="log-history" id="growthLogHistory" style="max-height:280px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="settings-wrap">
+    <div class="page-title">SETTINGS</div>
+    <div class="page-sub" style="margin-bottom:32px;">Manage your run</div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Current Run</div>
+      <div id="settingsRunInfo"></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Danger Zone</div>
+      <div class="danger-zone">
+        <div class="danger-title">Reset Run</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">This will permanently delete all run data and progress logs.</div>
+        <button class="btn btn-danger" onclick="resetRun()">🗑 Delete & Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const STORAGE_KEY = '90dayrun_data';
+let state = null;
+let dashChartInst = null;
+let growthChartInst = null;
+let currentWeekOffset = 0;
+
+const motivations = [
+  ["You've made it through the first week!", "The hardest step was starting. Keep going."],
+  ["Two weeks strong.", "Consistency is your superpower. Don't break the chain."],
+  ["You're 30 days in — that's incredible.", "Most people quit before now. You're not most people."],
+  ["Halfway there.", "The finish line is closer than where you started."],
+  ["60 days done. You're a machine.", "Finish what you started. 30 days to go."],
+  ["The final stretch.", "Don't slow down now. Everything you've built is on the line."],
+  ["You're just getting started. Let's go!", "Stay consistent. Every day counts."],
+];
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch { return null; }
+}
+
+function addTask() {
+  const time = document.getElementById('taskTime').value.trim();
+  const name = document.getElementById('taskName').value.trim();
+  if (!name) return;
+  if (!state) { renderTaskInSetup(time || '—', name); }
+  document.getElementById('taskTime').value = '';
+  document.getElementById('taskName').value = '';
+}
+
+let tempTasks = [];
+
+function renderTaskInSetup(time, name) {
+  tempTasks.push({ time, name });
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+  tempTasks.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    div.innerHTML = `<span class="task-time">${t.time}</span><span>${t.name}</span>
+      <button class="task-remove" onclick="removeTask(${i})">×</button>`;
+    list.appendChild(div);
+  });
+}
+
+function removeTask(i) {
+  tempTasks.splice(i, 1);
+  renderTaskInSetup(...(tempTasks[0] ? [] : []));
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+  tempTasks.forEach((t, idx) => {
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    div.innerHTML = `<span class="task-time">${t.time}</span><span>${t.name}</span>
+      <button class="task-remove" onclick="removeTask(${idx})">×</button>`;
+    list.appendChild(div);
+  });
+}
+
+function toggleGoalType() {
+  const t = document.getElementById('s-goalType').value;
+  document.getElementById('moneyGoalFields').style.display = t === 'money' ? '' : 'none';
+  document.getElementById('achievementGoalFields').style.display = t !== 'money' ? '' : 'none';
+}
+
+function startRun() {
+  const name = document.getElementById('s-name').value.trim() || 'My 90 Day Run';
+  const goalType = document.getElementById('s-goalType').value;
+  const startDate = document.getElementById('s-startDate').value || new Date().toISOString().split('T')[0];
+  const target = parseFloat(document.getElementById('s-target').value) || 10000;
+  const starting = parseFloat(document.getElementById('s-starting').value) || 0;
+  const achievGoal = document.getElementById('s-achievGoal').value.trim() || 'Reach my goal';
+
+  // Add any unsaved task
+  const tn = document.getElementById('taskName').value.trim();
+  const tt = document.getElementById('taskTime').value.trim();
+  if (tn) tempTasks.push({ time: tt || '—', name: tn });
+
+  state = {
+    name, goalType, startDate, target, starting,
+    achievGoal,
+    tasks: tempTasks.length ? [...tempTasks] : [
+      { time: '6:00am', name: 'Morning review & affirmations' },
+      { time: '7:00am', name: 'Deep work session #1' },
+      { time: '12:00pm', name: 'Midday check-in & progress log' },
+      { time: '3:00pm', name: 'Deep work session #2' },
+      { time: '8:00pm', name: 'Evening review & tomorrow prep' },
+    ],
+    logs: [],
+    taskCompletions: {},
+    noteLogs: [],
+  };
+  save();
+  init();
+}
+
+function dayNum(startDate) {
+  const start = new Date(startDate);
+  const now = new Date();
+  start.setHours(0,0,0,0); now.setHours(0,0,0,0);
+  return Math.floor((now - start) / 86400000) + 1;
+}
+
+function dateStr(startDate, offset) {
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().split('T')[0];
+}
+
+function fmtDate(d) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+function totalLogged() {
+  return state.logs.reduce((s, l) => s + l.amount, 0);
+}
+
+function computeStreak() {
+  // count consecutive days from today backwards with at least one task done
+  let streak = 0;
+  const day = dayNum(state.startDate);
+  for (let d = day; d >= 1; d--) {
+    const ds = dateStr(state.startDate, d - 1);
+    const comps = state.taskCompletions[ds];
+    if (comps && comps.length > 0) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function getMotivation(day) {
+  if (day >= 80) return motivations[5];
+  if (day >= 60) return motivations[4];
+  if (day >= 45) return motivations[3];
+  if (day >= 30) return motivations[2];
+  if (day >= 14) return motivations[1];
+  if (day >= 7) return motivations[0];
+  return motivations[6];
+}
+
+function renderDashboard() {
+  if (!state) return;
+  const day = Math.min(90, Math.max(1, dayNum(state.startDate)));
+  const left = Math.max(0, 90 - day + 1);
+  const pct = Math.round((Math.min(day, 90) / 90) * 100);
+
+  document.getElementById('dashTitle').textContent = state.name.toUpperCase();
+  document.getElementById('dashMeta').textContent =
+    `Started ${fmtDate(state.startDate)} • Ends ${fmtDate(dateStr(state.startDate, 89))}`;
+
+  document.getElementById('statDay').textContent = day;
+  document.getElementById('statLeft').textContent = left;
+  document.getElementById('statStreak').textContent = computeStreak();
+
+  if (state.goalType === 'money') {
+    const curr = totalLogged() + state.starting;
+    const goalPct = Math.round((curr / state.target) * 100);
+    document.getElementById('stat4label').textContent = 'Goal';
+    document.getElementById('stat4val').textContent = goalPct + '%';
+    document.getElementById('stat4sub').textContent = `$${curr.toLocaleString()} / $${state.target.toLocaleString()}`;
+  } else {
+    document.getElementById('stat4label').textContent = 'Logs';
+    document.getElementById('stat4val').textContent = state.noteLogs.length;
+    document.getElementById('stat4sub').textContent = 'total entries';
+  }
+
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const [mt, ms] = getMotivation(day);
+  document.getElementById('motivationText').textContent = mt;
+  document.getElementById('motivationSub').textContent = ms;
+
+  // Goal panel
+  if (state.goalType === 'money') {
+    document.getElementById('moneyPanel').style.display = '';
+    document.getElementById('achievPanel').style.display = 'none';
+    const curr = totalLogged() + state.starting;
+    document.getElementById('goalCurrent').textContent = '$' + curr.toLocaleString();
+    document.getElementById('goalTotal').textContent = '/ $' + state.target.toLocaleString();
+    document.getElementById('goalFill').style.width = Math.min(100, Math.round((curr / state.target) * 100)) + '%';
+    renderLogHistory();
+  } else {
+    document.getElementById('moneyPanel').style.display = 'none';
+    document.getElementById('achievPanel').style.display = '';
+    document.getElementById('achievGoalDisplay').textContent = state.achievGoal;
+    renderNoteHistory();
+  }
+
+  renderTodaySchedule();
+  renderDashChart();
+}
+
+function renderLogHistory() {
+  const h = document.getElementById('logHistory');
+  const logs = [...state.logs].reverse().slice(0, 10);
+  if (!logs.length) { h.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:10px 0;">No entries yet.</div>'; return; }
+  h.innerHTML = logs.map(l =>
+    `<div class="log-row"><span class="log-row-date">${fmtDate(l.date)}</span><span class="log-row-amt">+$${l.amount.toLocaleString()}</span></div>`
+  ).join('');
+}
+
+function renderNoteHistory() {
+  const h = document.getElementById('noteHistory');
+  const logs = [...(state.noteLogs || [])].reverse().slice(0, 5);
+  if (!logs.length) { h.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:10px 0;">No entries yet.</div>'; return; }
+  h.innerHTML = logs.map(l =>
+    `<div class="log-row" style="flex-direction:column;align-items:flex-start;gap:2px;"><span class="log-row-date">${fmtDate(l.date)}</span><span style="font-size:13px;">${l.note}</span></div>`
+  ).join('');
+}
+
+function logAmount() {
+  const val = parseFloat(document.getElementById('logAmt').value);
+  if (!val || val <= 0) return;
+  const today = new Date().toISOString().split('T')[0];
+  state.logs.push({ date: today, amount: val });
+  document.getElementById('logAmt').value = '';
+  save();
+  renderDashboard();
+  if (growthChartInst) renderGrowthPage();
+}
+
+function logNote() {
+  const note = document.getElementById('achievNote').value.trim();
+  if (!note) return;
+  const today = new Date().toISOString().split('T')[0];
+  if (!state.noteLogs) state.noteLogs = [];
+  state.noteLogs.push({ date: today, note });
+  document.getElementById('achievNote').value = '';
+  save();
+  renderDashboard();
+}
+
+function renderTodaySchedule() {
+  const today = new Date().toISOString().split('T')[0];
+  const completions = state.taskCompletions[today] || [];
+  const container = document.getElementById('todaySchedule');
+  if (!state.tasks.length) {
+    container.innerHTML = '<div class="sched-empty">No tasks set.</div>';
+    return;
+  }
+  container.innerHTML = state.tasks.map((t, i) => {
+    const done = completions.includes(i);
+    return `<div class="sched-task ${done ? 'done' : ''}" onclick="toggleTask('${today}', ${i}, this)">
+      <div class="sched-check">${done ? '✓' : ''}</div>
+      <div class="sched-task-name">${t.name}</div>
+      <div class="sched-task-time">${t.time}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTask(dateStr, taskIdx, el) {
+  if (!state.taskCompletions[dateStr]) state.taskCompletions[dateStr] = [];
+  const arr = state.taskCompletions[dateStr];
+  const pos = arr.indexOf(taskIdx);
+  if (pos === -1) arr.push(taskIdx);
+  else arr.splice(pos, 1);
+  save();
+  el.classList.toggle('done');
+  const check = el.querySelector('.sched-check');
+  const done = arr.includes(taskIdx);
+  check.textContent = done ? '✓' : '';
+  if (done) el.classList.add('done');
+  else el.classList.remove('done');
+  // update streak
+  document.getElementById('statStreak').textContent = computeStreak();
+}
+
+function renderDashChart() {
+  const ctx = document.getElementById('dashChart');
+  if (!ctx) return;
+  if (dashChartInst) { dashChartInst.destroy(); }
+
+  const day = Math.min(90, dayNum(state.startDate));
+  const labels = [];
+  const data = [];
+  let running = state.starting;
+  const logsByDate = {};
+  state.logs.forEach(l => { logsByDate[l.date] = (logsByDate[l.date] || 0) + l.amount; });
+
+  for (let d = 1; d <= day; d++) {
+    const ds = dateStr(state.startDate, d - 1);
+    running += (logsByDate[ds] || 0);
+    if (d % 5 === 0 || d === 1 || d === day) labels.push('Day ' + d);
+    else labels.push('');
+    data.push(running);
+  }
+
+  dashChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#e8c547',
+        backgroundColor: 'rgba(232,197,71,0.08)',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: {
+            color: '#888', font: { size: 11 },
+            callback: v => state.goalType === 'money' ? '$' + v.toLocaleString() : v
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderSchedulePage() {
+  if (!state) return;
+  const startDay = currentWeekOffset * 7;
+  const weekNum = currentWeekOffset + 1;
+  document.getElementById('weekLabel').textContent = `Week ${weekNum}`;
+
+  const today = new Date().toISOString().split('T')[0];
+  const container = document.getElementById('scheduleContainer');
+  container.innerHTML = '';
+
+  for (let d = startDay; d < startDay + 7 && d < 90; d++) {
+    const ds = dateStr(state.startDate, d);
+    const completions = state.taskCompletions[ds] || [];
+    const isToday = ds === today;
+    const isPast = ds < today;
+    const dayLabel = new Date(ds + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+    let badge, badgeClass;
+    if (isToday) { badge = 'TODAY'; badgeClass = 'badge-today'; }
+    else if (isPast) { badge = completions.length + '/' + state.tasks.length + ' done'; badgeClass = 'badge-done'; }
+    else { badge = 'Upcoming'; badgeClass = 'badge-future'; }
+
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'schedule-day' + (isToday ? ' expanded' : '');
+    dayDiv.innerHTML = `
+      <div class="schedule-day-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div>
+          <div class="schedule-day-title">Day ${d + 1} — ${dayLabel}</div>
+        </div>
+        <span class="schedule-day-badge ${badgeClass}">${badge}</span>
+      </div>
+      <div class="schedule-day-tasks">
+        ${!state.tasks.length ? '<div class="sched-empty">No tasks.</div>' :
+          state.tasks.map((t, i) => {
+            const done = completions.includes(i);
+            return `<div class="sched-task ${done ? 'done' : ''}" onclick="toggleTask('${ds}', ${i}, this)">
+              <div class="sched-check">${done ? '✓' : ''}</div>
+              <div class="sched-task-name">${t.name}</div>
+              <div class="sched-task-time">${t.time}</div>
+            </div>`;
+          }).join('')}
+      </div>
+    `;
+    container.appendChild(dayDiv);
+  }
+}
+
+function changeWeek(dir) {
+  const maxWeek = Math.ceil(90 / 7) - 1;
+  currentWeekOffset = Math.max(0, Math.min(maxWeek, currentWeekOffset + dir));
+  renderSchedulePage();
+}
+
+function renderGrowthPage() {
+  if (!state) return;
+  const ctx = document.getElementById('growthChart');
+  if (growthChartInst) { growthChartInst.destroy(); }
+
+  const day = Math.min(90, dayNum(state.startDate));
+  const labels = Array.from({length: day}, (_, i) => 'Day ' + (i + 1));
+  const data = [];
+  const logsByDate = {};
+  state.logs.forEach(l => { logsByDate[l.date] = (logsByDate[l.date] || 0) + l.amount; });
+  let running = state.starting;
+  for (let d = 1; d <= day; d++) {
+    running += (logsByDate[dateStr(state.startDate, d - 1)] || 0);
+    data.push(running);
+  }
+
+  growthChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: state.goalType === 'money' ? 'Total Raised' : 'Progress',
+        data,
+        borderColor: '#4caf7d',
+        backgroundColor: 'rgba(76,175,125,0.08)',
+        borderWidth: 2.5,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: { size: 11 }, maxTicksLimit: 10 } },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { color: '#888', font: { size: 11 }, callback: v => state.goalType === 'money' ? '$' + v.toLocaleString() : v }
+        }
+      }
+    }
+  });
+
+  // Breakdown
+  const breakdown = document.getElementById('growthGoalBreakdown');
+  const curr = totalLogged() + state.starting;
+  const needed = Math.max(0, state.target - curr);
+  const day2 = dayNum(state.startDate);
+  const daysLeft = Math.max(1, 90 - day2 + 1);
+  const dailyNeeded = (needed / daysLeft).toFixed(2);
+  if (state.goalType === 'money') {
+    breakdown.innerHTML = `
+      <div style="margin-bottom:12px;">
+        <div class="stat-label">Total raised</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);">$${curr.toLocaleString()}</div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div class="stat-label">Remaining</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;">$${needed.toLocaleString()}</div>
+      </div>
+      <div>
+        <div class="stat-label">Daily target to hit goal</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);">$${parseFloat(dailyNeeded).toLocaleString()}/day</div>
+      </div>
+    `;
+  } else {
+    breakdown.innerHTML = `
+      <div style="margin-bottom:12px;font-size:14px;line-height:1.6;">${state.achievGoal}</div>
+      <div><div class="stat-label">Progress Logs</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);">${(state.noteLogs || []).length}</div></div>
+    `;
+  }
+
+  // Full log history
+  const gh = document.getElementById('growthLogHistory');
+  const logs = [...(state.goalType === 'money' ? state.logs : (state.noteLogs || []))].reverse();
+  if (!logs.length) { gh.innerHTML = '<div style="font-size:13px;color:var(--muted);">No entries yet.</div>'; return; }
+  if (state.goalType === 'money') {
+    gh.innerHTML = logs.map(l =>
+      `<div class="log-row"><span class="log-row-date">${fmtDate(l.date)}</span><span class="log-row-amt">+$${l.amount.toLocaleString()}</span></div>`
+    ).join('');
+  } else {
+    gh.innerHTML = logs.map(l =>
+      `<div class="log-row" style="flex-direction:column;align-items:flex-start;gap:2px;"><span class="log-row-date">${fmtDate(l.date)}</span><span style="font-size:13px;">${l.note}</span></div>`
+    ).join('');
+  }
+}
+
+function renderSettingsPage() {
+  if (!state) return;
+  const info = document.getElementById('settingsRunInfo');
+  const day = dayNum(state.startDate);
+  const end = dateStr(state.startDate, 89);
+  info.innerHTML = `
+    <div class="settings-row">
+      <div><div class="settings-row-label">${state.name}</div><div class="settings-row-meta">Day ${day} of 90</div></div>
+      <div style="font-size:12px;color:var(--muted);">Active</div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-label">Start Date</div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);">${fmtDate(state.startDate)}</div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-label">End Date</div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);">${fmtDate(end)}</div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-label">Goal Type</div>
+      <div style="font-size:13px;color:var(--muted);">${state.goalType}</div>
+    </div>
+    ${state.goalType === 'money' ? `<div class="settings-row">
+      <div class="settings-row-label">Target</div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--green);">$${state.target.toLocaleString()}</div>
+    </div>` : ''}
+  `;
+}
+
+function resetRun() {
+  if (!confirm('Are you sure? This will delete all your progress.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = null;
+  tempTasks = [];
+  location.reload();
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const pages = ['dashboard','schedule','growth','settings'];
+  const idx = pages.indexOf(name);
+  if (idx >= 0) tabs[idx].classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'schedule') renderSchedulePage();
+  if (name === 'growth') renderGrowthPage();
+  if (name === 'settings') renderSettingsPage();
+}
+
+function init() {
+  document.getElementById('navTabs').style.display = '';
+  showPage('dashboard');
+}
+
+// Boot
+(function() {
+  // Set default date
+  document.getElementById('s-startDate').value = new Date().toISOString().split('T')[0];
+  state = load();
+  if (state) {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
